@@ -71,6 +71,7 @@ subprojects {
         boringsslIncludeDir = normalizePath("$boringsslHome/include")
         boringssl32BuildDir = normalizePath("$boringsslHome/build32")
         boringssl64BuildDir = normalizePath("$boringsslHome/build64")
+        boringsslppc64leBuildDir = normalizePath("$boringsslHome/buildppc64le")
 
         if (project.hasProperty("jdkHome")) {
             jdkHome = project.property("jdkHome")
@@ -83,11 +84,12 @@ subprojects {
 
         build32Bit = file("$boringssl32BuildDir").exists()
         build64Bit = file("$boringssl64BuildDir").exists()
+        buildppc64le = file("$boringsslppc64leBuildDir").exists()
 
         // Ensure the environment is configured properly.
         assert file("$boringsslHome").exists()
         assert file("$boringsslIncludeDir").exists()
-        assert build32Bit || build64Bit
+        assert build32Bit || build64Bit || buildppc64le
         assert file("$jdkHome").exists()
         assert file("$jdkIncludeDir").exists()
 

@@ -28,6 +28,29 @@ artifacts {
 }
 
 model {
+
+
+  toolChains {
+
+    clang(Clang)
+
+    gcc(Gcc){
+        target("linux_ppc64le") {
+	        cppCompiler.executable = "/usr/bin/gcc"
+	    }
+    }
+  }
+  platforms {
+    x86_32 {
+      architecture "x86"
+    }
+    x86_64 {
+      architecture "x86_64"
+    }
+    linux_ppc64le {
+      architecture "linux_ppc64le"
+    }
+  }
     components {
         // Builds exe/ which generates the content of NativeConstants.java
         gen(NativeExecutableSpec) {
