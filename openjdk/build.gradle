@@ -12,9 +12,11 @@ ext {
     // Build the list of classifiers that will be used in the build.
     arch32Name = 'x86'
     arch64Name = 'x86_64'
+    archppc64leName = 'ppc64le'
     nativeClassifiers = []
     nativeClassifier64Bit = null
     nativeClassifier32Bit = null
+    nativeClassifierppc64le = null 
     preferredClassifier = null
     preferredSourceSet = null
     preferredNativeFileDir = null
@@ -31,6 +33,17 @@ ext {
         nativeClassifiers += nativeClassifier32Bit
         if (preferredClassifier == null) {
             preferredClassifier = nativeClassifier32Bit
+            preferredSourceSet = sourceSetName(preferredClassifier)
+            preferredNativeFileDir = nativeResourcesDir(preferredClassifier)
+        }
+    }
+    if (buildppc64le) {
+        nativeClassifierppc64le = classifierFor(osName, archppc64leName)
+
+        nativeClassifiers += nativeClassifierppc64le
+
+        if (preferredClassifier == null) {
+            preferredClassifier = nativeClassifierppc64le
             preferredSourceSet = sourceSetName(preferredClassifier)
             preferredNativeFileDir = nativeResourcesDir(preferredClassifier)
         }
@@ -298,7 +311,22 @@ model {
         x86_64 {
             architecture arch64Name
         }
+        ppc64le {
+            architecture archppc64leName
+        }
     }
+
+  toolChains {
+
+    clang(Clang)
+
+    gcc(Gcc){
+        target("ppc64le") {
+                cppCompiler.executable = "/usr/bin/gcc"
+            }
+    }
+  }
+
 
     buildTypes {
         release
@@ -309,6 +337,7 @@ model {
         conscrypt_openjdk_jni(NativeLibrarySpec) {
             if (build32Bit) { targetPlatform arch32Name }
             if (build64Bit) { targetPlatform arch64Name }
+            if (buildppc64le) { targetPlatform archppc64leName }
 
             sources {
                 cpp {
@@ -326,12 +355,16 @@ model {
 
                     // Set up 32-bit vs 64-bit build
                     def building64Bit = false
+                    def buildingppc64leBit = false
                     def libPath
                     if (targetPlatform.getArchitecture().getName() == "x86") {
                         libPath = "$boringssl32BuildDir"
                     } else if (targetPlatform.getArchitecture().getName() == "x86-64") {
                         libPath = "$boringssl64BuildDir"
                         building64Bit = true
+                    } else if (targetPlatform.getArchitecture().getName() == "ppc64le") {
+                        libPath = "$boringsslppc64leBuildDir"
+                        buildingppc64leBit = true
                     } else {
                         throw new GradleException("Unknown architecture: " +
                                 targetPlatform.getArchitecture().name)
