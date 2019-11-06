@@ -30,6 +30,7 @@ import java.nio.ByteBuffer;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.HashSet;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -582,9 +583,13 @@ public class SSLEngineTest {
                         assertNotNull(session);
                         // By the point of the handshake where we're validating certificates,
                         // the hostname is known and the cipher suite should be agreed
+
                         assertEquals(referenceContext.host.getHostName(), session.getPeerHost());
-                        assertEquals(referenceEngine.getEnabledCipherSuites()[0],
-                            session.getCipherSuite());
+
+			String sessionSuite = session.getCipherSuite();
+                        List<String> enabledSuites =
+                            Arrays.asList(referenceEngine.getEnabledCipherSuites());
+                        assertTrue(enabledSuites.contains(sessionSuite));
                         wasCalled[0] = true;
                     } catch (Exception e) {
                         throw new CertificateException("Something broke", e);
@@ -646,9 +651,13 @@ public class SSLEngineTest {
                         // By the point of the handshake where we're validating client certificates,
                         // the cipher suite should be agreed and the server's own certificates
                         // should have been delivered
-                        assertEquals(referenceEngine.getEnabledCipherSuites()[0],
-                            session.getCipherSuite());
+			
+			String sessionSuite = session.getCipherSuite();
+                        List<String> enabledSuites =
+                            Arrays.asList(referenceEngine.getEnabledCipherSuites());
+                        assertTrue(enabledSuites.contains(sessionSuite));                       
                         assertNotNull(session.getLocalCertificates());
+
                         assertEquals("CN=localhost",
                             ((X509Certificate) session.getLocalCertificates()[0])
                                 .getSubjectDN().getName());
